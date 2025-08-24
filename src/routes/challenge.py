@@ -28,10 +28,12 @@ class ChallengeRequest(BaseModel):
 @router.post('/generate-challenge')
 async def generate_challenge(
         request: ChallengeRequest,
+        request_obj: Request,
         db: Session = Depends(get_db)
 ):
+    user_id = None
     try:
-        user_details = authenticate_and_get_user_details(request)
+        user_details = authenticate_and_get_user_details(request_obj)
         user_id = user_details.get('user_id')
 
         logger.info(f"User {user_id} requested a {request.difficulty} challenge")
@@ -49,20 +51,32 @@ async def generate_challenge(
 
         challenge_data = generate_challenge_with_ai(request.difficulty)
 
+        challenge_data['options'] = json.dumps(challenge_data['options']) if not isinstance(challenge_data['options'], str) else challenge_data['options']
+
         new_challenge = create_challenge(
             db,
+            request.difficulty,
             user_id,
-            **challenge_data,
+            challenge_data['title'],
+            challenge_data['options'],
+            challenge_data['correct_answer_id'],
+            challenge_data['explanation'],
         )
 
         quota.quota_remaining -=1
         db.commit()
 
+        logger.info(f"Successfully created challenge {new_challenge.id} for user {user_id}")
+
+        options = new_challenge.options
+        if isinstance(options, str):
+            options = json.loads(options)
+
         return {
             'id': new_challenge.id,
             'difficulty': request.difficulty,
             'title': new_challenge.title,
-            'options': json.loads(new_challenge.options),
+            'options': options,
             'correct_answer_id': new_challenge.correct_answer_id,
             'explanation': new_challenge.explanation,
             'timestamp': new_challenge.date_created.isoformat(),
@@ -77,8 +91,10 @@ async def generate_challenge(
 
 @router.get('/my-history')
 async def my_history(request: Request, db: Session = Depends(get_db)):
-    user_details = authenticate_and_get_user_details(request)
-    user_id = user_details.get('user_id')
+    user_id = None
+    try:
+        user_details = authenticate_and_get_user_details(request)
+        user_id = user_details.get('user_id')
 
         logger.info(f"User {user_id} requested challenge history")
 
