@@ -22,7 +22,7 @@ class ChallengeQuota(Base):
     __tablename__ = 'challenge_quotas'
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(String, nullable=False, unique=True)
-    quota_remaining = Column(Integer, nullable=False, default=50)
+    quota_remaining = Column(Integer, nullable=False, default=5)
     last_reset_date = Column(DateTime, default=datetime.now)
 
 def get_engine():
