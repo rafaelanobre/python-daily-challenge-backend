@@ -13,5 +13,6 @@ dependencies = [
     "psycopg2>=2.9.10",
     "python-dotenv>=1.1.1",
     "sqlalchemy>=2.0.41",
+    "svix>=1.74.1",
     "uvicorn>=0.35.0",
 ]
