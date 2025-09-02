@@ -99,8 +99,25 @@ async def my_history(request: Request, db: Session = Depends(get_db)):
         logger.info(f"User {user_id} requested challenge history")
 
         challenges = get_user_challenges(db, user_id)
-        logger.debug(f"Found {len(challenges) if challenges else 0} challenges for user {user_id}")
-        return {'challenges': challenges}
+
+        formatted_challenges = []
+        for challenge in challenges:
+            options = challenge.options
+            if isinstance(options, str):
+                options = json.loads(options)
+
+            formatted_challenges.append({
+                'id': challenge.id,
+                'difficulty': challenge.difficulty,
+                'title': challenge.title,
+                'options': options,
+                'correct_answer_id': challenge.correct_answer_id,
+                'explanation': challenge.explanation,
+                'timestamp': challenge.date_created.isoformat(),
+            })
+
+        logger.debug(f"Found {len(formatted_challenges)} challenges for user {user_id}")
+        return {'challenges': formatted_challenges}
     except Exception as e:
         logger.error(f"Error getting challenge history for user {user_id if user_id else 'unknown'}: {e}")
         raise HTTPException(status_code=400, detail=str(e))

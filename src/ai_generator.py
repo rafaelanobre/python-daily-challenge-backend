@@ -59,10 +59,8 @@ def generate_challenge_with_ai(difficulty: str) -> Dict[str, Any]:
         )
         challenge_data = response.output_parsed
 
-        # Log the raw challenge_data for debugging
         logger.info(f"AI challenge_data: {challenge_data}")
 
-        # Use Pydantic's new model_validate method (parse_obj is deprecated)
         challenge = QuestionModel.model_validate(challenge_data)
 
         return {
