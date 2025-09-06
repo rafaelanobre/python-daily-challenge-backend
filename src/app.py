@@ -13,12 +13,16 @@ logger.info("Starting Python Daily Challenge API")
 
 app = FastAPI()
 
+allowed_origins = os.getenv("ALLOWED_ORIGINS")
+if not allowed_origins:
+    raise ValueError("ALLOWED_ORIGINS for environment not set")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins.split(','),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_methods=['GET', 'POST', 'OPTIONS'],
+    allow_headers=['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
 )
 
 app.include_router(challenge.router, prefix="/api")
