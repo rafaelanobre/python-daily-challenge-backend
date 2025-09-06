@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 import json
 from datetime import datetime
@@ -20,7 +20,7 @@ router = APIRouter()
 logger = get_logger()
 
 class ChallengeRequest(BaseModel):
-    difficulty: str
+    difficulty: str = Field(pattern='^(easy|medium|hard)$', max_length=10)
 
     class Config:
         json_schema_extra = {'example': {'difficulty': 'easy'}}
