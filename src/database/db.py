@@ -33,7 +33,7 @@ def create_challenge(
         correct_answer_id: int,
         explanation: str
 ):
-    db.challenge = models.Challenge(
+    db_challenge = models.Challenge(
         difficulty=difficulty,
         created_by=created_by,
         title=title,
@@ -41,10 +41,10 @@ def create_challenge(
         correct_answer_id=correct_answer_id,
         explanation=explanation
     )
-    db.add(db.challenge)
+    db.add(db_challenge)
     db.commit()
-    db.refresh(db.challenge)
-    return db.challenge
+    db.refresh(db_challenge)
+    return db_challenge
 
 def get_user_challenges(db: Session, user_id: str):
     return (db
